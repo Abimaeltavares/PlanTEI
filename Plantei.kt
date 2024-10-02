@@ -6,17 +6,25 @@ data class Produto(
     val previsaoColheita: String
 )
 
+data class Producao(
+    val produto: Produto,
+    val quantidade: Double, // em kg
+    val dataColheita: String
+)
+
 val produtos = mutableListOf<Produto>()
+val producoes = mutableListOf<Producao>()
 
 fun main() {
     while (true) {
         println("Bem-vindo ao PlanTEI!")
         println("1. Cadastrar Produto")
         println("2. Listar Produtos")
-        println("3. Acompanhar Produção")
-        println("4. Controle de Estoque")
-        println("5. Gerar Relatórios")
-        println("6. Sair")
+        println("3. Registrar Produção")
+        println("4. Listar Produção por Produto")
+        println("5. Controle de Estoque")
+        println("6. Gerar Relatórios")
+        println("7. Sair")
 
         print("Escolha uma opção: ")
         val opcao = readLine()
@@ -24,10 +32,11 @@ fun main() {
         when (opcao) {
             "1" -> cadastrarProduto()
             "2" -> listarProdutos()
-            "3" -> acompanharProducao()
-            "4" -> controleEstoque()
-            "5" -> gerarRelatorios()
-            "6" -> {
+            "3" -> registrarProducao()
+            "4" -> listarProducaoPorProduto()
+            "5" -> controleEstoque()
+            "6" -> gerarRelatorios()
+            "7" -> {
                 println("Saindo do sistema. Até logo!")
                 return
             }
@@ -65,8 +74,46 @@ fun listarProdutos() {
     }
 }
 
-fun acompanharProducao() {
-    println("Funcionalidade de acompanhar produção ainda não implementada.")
+fun registrarProducao() {
+    if (produtos.isEmpty()) {
+        println("Nenhum produto cadastrado. Cadastre um produto primeiro.")
+        return
+    }
+
+    println("Selecione o produto para registrar a produção:")
+    listarProdutos()
+    print("Digite o nome do produto: ")
+    val nomeProduto = readLine() ?: ""
+    val produto = produtos.find { it.nome.equals(nomeProduto, ignoreCase = true) }
+
+    if (produto == null) {
+        println("Produto não encontrado.")
+        return
+    }
+
+    print("Digite a quantidade colhida em kg: ")
+    val quantidade = readLine()?.toDoubleOrNull() ?: 0.0
+    print("Digite a data da colheita (dd/mm/aaaa): ")
+    val dataColheita = readLine() ?: ""
+
+    val producao = Producao(produto, quantidade, dataColheita)
+    producoes.add(producao)
+    println("Produção registrada com sucesso para o produto '${produto.nome}'.")
+}
+
+fun listarProducaoPorProduto() {
+    if (producoes.isEmpty()) {
+        println("Nenhuma produção registrada.")
+        return
+    }
+
+    println("Produção registrada por produto:")
+    producoes.groupBy { it.produto.nome }.forEach { (nomeProduto, producoes) ->
+        println("Produto: $nomeProduto")
+        producoes.forEach { producao ->
+            println(" - Data: ${producao.dataColheita}, Quantidade: ${producao.quantidade} kg")
+        }
+    }
 }
 
 fun controleEstoque() {
