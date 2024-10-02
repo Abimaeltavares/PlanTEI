@@ -3,7 +3,8 @@ data class Produto(
     val tipo: String,
     val cultura: String,
     val dataPlantio: String,
-    val previsaoColheita: String
+    val previsaoColheita: String,
+    var quantidadeEstoque: Double = 0.0 // Adicionada a quantidade em estoque
 )
 
 data class Producao(
@@ -22,9 +23,10 @@ fun main() {
         println("2. Listar Produtos")
         println("3. Registrar Produção")
         println("4. Listar Produção por Produto")
-        println("5. Controle de Estoque")
-        println("6. Gerar Relatórios")
-        println("7. Sair")
+        println("5. Registrar Saída de Estoque")
+        println("6. Listar Estoque por Produto")
+        println("7. Gerar Relatórios")
+        println("8. Sair")
 
         print("Escolha uma opção: ")
         val opcao = readLine()
@@ -34,9 +36,10 @@ fun main() {
             "2" -> listarProdutos()
             "3" -> registrarProducao()
             "4" -> listarProducaoPorProduto()
-            "5" -> controleEstoque()
-            "6" -> gerarRelatorios()
-            "7" -> {
+            "5" -> registrarSaidaEstoque()
+            "6" -> listarEstoquePorProduto()
+            "7" -> gerarRelatorios()
+            "8" -> {
                 println("Saindo do sistema. Até logo!")
                 return
             }
@@ -70,7 +73,7 @@ fun listarProdutos() {
 
     println("Lista de Produtos:")
     produtos.forEach { produto ->
-        println(" - Nome: ${produto.nome}, Tipo: ${produto.tipo}, Cultura: ${produto.cultura}, Data de Plantio: ${produto.dataPlantio}, Previsão de Colheita: ${produto.previsaoColheita}")
+        println(" - Nome: ${produto.nome}, Tipo: ${produto.tipo}, Cultura: ${produto.cultura}, Data de Plantio: ${produto.dataPlantio}, Previsão de Colheita: ${produto.previsaoColheita}, Estoque: ${produto.quantidadeEstoque} kg")
     }
 }
 
@@ -98,7 +101,49 @@ fun registrarProducao() {
 
     val producao = Producao(produto, quantidade, dataColheita)
     producoes.add(producao)
+    produto.quantidadeEstoque += quantidade // Atualiza a quantidade em estoque
     println("Produção registrada com sucesso para o produto '${produto.nome}'.")
+}
+
+fun registrarSaidaEstoque() {
+    if (produtos.isEmpty()) {
+        println("Nenhum produto cadastrado. Cadastre um produto primeiro.")
+        return
+    }
+
+    println("Selecione o produto para registrar a saída de estoque:")
+    listarProdutos()
+    print("Digite o nome do produto: ")
+    val nomeProduto = readLine() ?: ""
+    val produto = produtos.find { it.nome.equals(nomeProduto, ignoreCase = true) }
+
+    if (produto == null) {
+        println("Produto não encontrado.")
+        return
+    }
+
+    print("Digite a quantidade a ser retirada em kg: ")
+    val quantidadeSaida = readLine()?.toDoubleOrNull() ?: 0.0
+
+    if (quantidadeSaida > produto.quantidadeEstoque) {
+        println("Quantidade solicitada maior que a disponível em estoque.")
+        return
+    }
+
+    produto.quantidadeEstoque -= quantidadeSaida // Atualiza a quantidade em estoque
+    println("Saída de estoque registrada com sucesso para o produto '${produto.nome}'.")
+}
+
+fun listarEstoquePorProduto() {
+    if (produtos.isEmpty()) {
+        println("Nenhum produto cadastrado.")
+        return
+    }
+
+    println("Estoque por Produto:")
+    produtos.forEach { produto ->
+        println(" - Nome: ${produto.nome}, Estoque: ${produto.quantidadeEstoque} kg")
+    }
 }
 
 fun listarProducaoPorProduto() {
